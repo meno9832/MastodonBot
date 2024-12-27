@@ -77,8 +77,6 @@ CHARACTER_ACCOUNT = 1
 CHARACTER_NAME = 2
 CHARACTER_MONEY = 3
 
-
-
 # [/]빼고 전부 제거하는 정규 표현식
 CLEANER = re.compile('[^\w\s\[\]/]')
 

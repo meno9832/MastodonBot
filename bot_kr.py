@@ -250,6 +250,25 @@ def buySomething(account, item):
 def isAffordable(price, money):
     return money > price
 
+def register_new_user(account):
+    # 새로운 사용자의 계정을 스프레드시트에 등록
+    # account: 사용자의 Mastodon 계정(username)
+    try:
+        # 캐릭터 워크시트의 모든 계정 데이터 가져오기
+        existing_accounts = character.col_values(CHARACTER_ACCOUNT)
+        # 사용자 계정이 이미 존재하는지 확인
+        if account in existing_accounts:
+            print(f"사용자 {account}는 이미 등록되어 있습니다.")
+            return False  # 이미 등록된 사용자
+        # 새로운 사용자 정보 추가 (디폴트 값: 이름=계정명, 돈=1000)
+        new_row = [account, account, 1000]
+        character.append_row(new_row)
+        print(f"새로운 사용자 {account}가 등록되었습니다!")
+        return True  # 새로 등록된 사용자
+
+    except Exception as e:
+        print(f"사용자 등록 중 오류 발생: {e}")
+        return False
 
 # 이벤트 리스너
 class Listener(StreamListener):
@@ -359,7 +378,16 @@ class Listener(StreamListener):
 						item.append(cell)
 					mastodon.status_reply(notification['status'], item, visibility='unlisted')
 							
-					
+				elif "사용" in user_text:
+                    account = notification['status']['account']["username"]
+                    user_row = sheet.row_values(account)
+
+                    for col_index, cell in enumerate(user_row, start=1):
+                         if item == cell:
+                            character.update_cell(user_row, col_index, "")
+                            break
+                    result = f"{item}이(가) 사용되었습니다."
+                    mastodon.status_reply(notification['status'], result, visibility='unlisted')
 			
             else:
                 mastodon.status_reply(notification['status'], "키워드 형식이 올바르지 않은 것 같아요.", visibility='unlisted')
